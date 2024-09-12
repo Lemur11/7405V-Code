@@ -40,9 +40,9 @@ lemlib::OdomSensors sensors(nullptr,
                             &imu 
 );
 
-lemlib::ControllerSettings lateral_controller(10, // proportional gain (kP)
+lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
                                               0, // integral gain (kI)
-                                              3, // derivative gain (kD)
+                                              10, // derivative gain (kD)
                                               3, // anti windup
                                               1, // small error range, in inches
                                               100, // small error range timeout, in milliseconds
@@ -130,7 +130,7 @@ void autonomous() {
 	int curAuton = autonSelector.getState();
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
-        left_auton(chassis, intake);
+        left_auton(chassis, intake, piston_a, piston_b);
 	} else if (curAuton == autonSelector.RIGHT) {
 		//
 	} else if (curAuton == autonSelector.CARRY) {
@@ -159,11 +159,11 @@ void opcontrol() {
     int b1_timer = TIMER_L;
     int b3_timer = TIMER_L;
     int vel = 12000;
+    lv_obj_t * label1 = lv_label_create(lv_scr_act());
 	while (true) {
         // print to screen
-        // lv_obj_t * label1 = lv_label_create(lv_scr_act());
-        // lv_label_set_text_fmt(label1, "X: %f, Y: %f, Angle: %f", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
-        // lv_obj_align(label1, LV_ALIGN_CENTER, 0, 0);
+        lv_label_set_text_fmt(label1, "X: %f, Y: %f, Angle: %f", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
+        lv_obj_align(label1, LV_ALIGN_CENTER, 0, 0);
         // button logic
         b1_timer += 1;
         b3_timer += 1;
