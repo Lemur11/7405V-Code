@@ -2,6 +2,8 @@
 #include "lemlib/api.hpp"
 #include "autonSelector.h"
 #include "autons.h"
+#include "lemlib/asset.hpp"
+#include "pros/misc.h"
 #include <cstddef>
 #include <cstdio>
 
@@ -24,8 +26,8 @@ lemlib::Drivetrain drivetrain(&left_mg,
                               2 // horizontal drift
 );
 // piston a, b
-pros::adi::Pneumatics piston_a('a', false);  
-pros::adi::Pneumatics piston_b('b', false);
+pros::adi::Pneumatics hammer('a', false);
+pros::adi::Pneumatics mogo_mech('b', false);  
 // imu 4
 pros::Imu imu(9);
 // TODO determine where rotation sensor is reversed or not
@@ -124,13 +126,14 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+ASSET(mogo_rush_txt);
 void autonomous() {
     left_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	int curAuton = autonSelector.getState();
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
-        left_auton(chassis, intake, piston_a, piston_b);
+        left_auton(chassis, intake, mogo_mech, hammer);
 	} else if (curAuton == autonSelector.RIGHT) {
 		//
 	} else if (curAuton == autonSelector.CARRY) {
@@ -155,9 +158,6 @@ void opcontrol() {
     left_mg.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     int intake_on = 0;
-    int TIMER_L = 20;
-    int b1_timer = TIMER_L;
-    int b3_timer = TIMER_L;
     int vel = 12000;
     lv_obj_t * label1 = lv_label_create(lv_scr_act());
 	while (true) {
@@ -165,28 +165,34 @@ void opcontrol() {
         lv_label_set_text_fmt(label1, "X: %f, Y: %f, Angle: %f", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
         lv_obj_align(label1, LV_ALIGN_CENTER, 0, 0);
         // button logic
-        b1_timer += 1;
-        b3_timer += 1;
-        if (master.get_digital(DIGITAL_R1) & (b1_timer > TIMER_L)) {
+        if (master.get_digital(DIGITAL_R1)) {
             if (intake_on == 0) {
                 intake.move_voltage(vel);
-                intake_on = 1;   
-            } else if (intake_on == 1) {
-                intake.move_voltage(0);
-                intake_on = 0;
+                intake_on = 1;
             }
-            b1_timer = 0;
-        } if (master.get_digital(DIGITAL_L1)) {
-            piston_a.extend();
-            piston_b.extend();
-        } if (master.get_digital(DIGITAL_L2)) {
-            piston_a.retract();
-            piston_b.retract();
-        } if (master.get_digital(DIGITAL_R2) & (b3_timer > TIMER_L)) {
-            vel *= -1;
-            intake.move_voltage(vel);
-            b3_timer = 0;
+        } else if (master.get_digital(DIGITAL_R2)) {
+            if (intake_on == 0) {
+                intake.move_voltage(-vel);
+                intake_on = 1;
+            }
+        } else if (intake_on == 1){
+            intake.move_voltage(0);
+            intake_on = 0;
+        }
+        if (master.get_digital(DIGITAL_L1)) {
+            mogo_mech.extend();
+            // piston_b.extend();
         } 
+        if (master.get_digital(DIGITAL_L2)) {
+            mogo_mech.retract();
+            // piston_b.retract();
+        }
+        if (master.get_digital(DIGITAL_A)) {
+            hammer.extend();
+        }
+        if (master.get_digital(DIGITAL_B)) {
+            hammer.retract();
+        }
         // drive logic
 		int dir = master.get_analog(ANALOG_LEFT_Y);    
 		int turn = master.get_analog(ANALOG_RIGHT_X);
