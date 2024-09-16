@@ -26,10 +26,10 @@ lemlib::Drivetrain drivetrain(&left_mg,
                               2 // horizontal drift
 );
 // piston a, b
-pros::adi::Pneumatics hammer('a', false);
+// pros::adi::Pneumatics hammer('a', false);
 pros::adi::Pneumatics mogo_mech('b', false);  
-// imu 4
-pros::Imu imu(9);
+// imu 8
+pros::Imu imu(8);
 // TODO determine where rotation sensor is reversed or not
 // pros::Rotation rotation_sensor(1);
 // lemlib::TrackingWheel horizontal_tracking_wheel(&rotation_sensor, lemlib::Omniwheel::NEW_275, -5.75);
@@ -126,14 +126,16 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-ASSET(mogo_rush_txt);
+// ASSET(mogo_rush_txt);
+// ASSET(mogo1_txt);
+// ASSET(mogo2_text)
 void autonomous() {
     left_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	int curAuton = autonSelector.getState();
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
-        left_auton(chassis, intake, mogo_mech, hammer);
+        left_auton(chassis, intake, mogo_mech,  mogo_mech);
 	} else if (curAuton == autonSelector.RIGHT) {
 		//
 	} else if (curAuton == autonSelector.CARRY) {
@@ -187,12 +189,12 @@ void opcontrol() {
             mogo_mech.retract();
             // piston_b.retract();
         }
-        if (master.get_digital(DIGITAL_A)) {
-            hammer.extend();
-        }
-        if (master.get_digital(DIGITAL_B)) {
-            hammer.retract();
-        }
+        // if (master.get_digital(DIGITAL_A)) {
+        //     hammer.extend();
+        // }
+        // if (master.get_digital(DIGITAL_B)) {
+        //     hammer.retract();
+        // }
         // drive logic
 		int dir = master.get_analog(ANALOG_LEFT_Y);    
 		int turn = master.get_analog(ANALOG_RIGHT_X);
