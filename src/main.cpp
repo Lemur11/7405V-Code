@@ -2,11 +2,11 @@
 #include "lemlib/api.hpp"
 #include "autonSelector.h"
 #include "autons.h"
-#include "lemlib/asset.hpp"
-#include "pros/misc.h"
-#include <cstddef>
-#include <cstdio>
-
+#include "liblvgl/font/lv_font.h"
+#include "pros/motors.h"
+#include "pros/rtos.hpp"
+#include <cstdint>
+#include <string>
 
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -26,10 +26,10 @@ lemlib::Drivetrain drivetrain(&left_mg,
                               2 // horizontal drift
 );
 // piston a, b
-// pros::adi::Pneumatics hammer('a', false);
+pros::adi::Pneumatics hammer('a', false);
 pros::adi::Pneumatics mogo_mech('b', false);  
 // imu 8
-pros::Imu imu(8);
+pros::Imu imu(3);
 // TODO determine where rotation sensor is reversed or not
 // pros::Rotation rotation_sensor(1);
 // lemlib::TrackingWheel horizontal_tracking_wheel(&rotation_sensor, lemlib::Omniwheel::NEW_275, -5.75);
@@ -92,8 +92,30 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
+void print_to_screen() {
+    lv_obj_t * label1 = lv_label_create(lv_scr_act());
+    // static lv_style_t st;
+    // lv_style_init(&st);
+    // lv_style_set_text_font(&st, &lv_font_montserrat_48);
+    lv_obj_set_style_text_font(label1, &lv_font_montserrat_36, 0);
+    while (true) {
+        printf("%f\n", chassis.getPose().x);
+        std::string state = "X: " + std::to_string(round(100*chassis.getPose().x)/100) + "\nY: " + std::to_string(float(round(100*chassis.getPose().y))/100) + "\nA: " + std::to_string(round(100*chassis.getPose().theta)/100);
+        const char *array = state.c_str(); 
+        lv_label_set_text(label1, array);
+        lv_obj_align(label1, LV_ALIGN_CENTER, 0, 0);        
+        pros::delay(20);
+    }
+
+}
+
 void initialize() {
-	autonSelector.initialize();
+    imu.reset();
+    pros::delay(2000);
+    pros::Task task(print_to_screen);
+	// autonSelector.initialize();
+    chassis.setPose(0, 0 ,0);
     chassis.calibrate();
 }
 
@@ -132,7 +154,9 @@ void competition_initialize() {}
 void autonomous() {
     left_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-	int curAuton = autonSelector.getState();
+    intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+	// int curAuton = autonSelector.getState();
+    int curAuton = autonSelector.LEFT;
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
         left_auton(chassis, intake, mogo_mech,  mogo_mech);
@@ -161,18 +185,14 @@ void opcontrol() {
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     int intake_on = 0;
     int vel = 12000;
-    lv_obj_t * label1 = lv_label_create(lv_scr_act());
 	while (true) {
-        // print to screen
-        lv_label_set_text_fmt(label1, "X: %f, Y: %f, Angle: %f", chassis.getPose().x, chassis.getPose().y, chassis.getPose().theta);
-        lv_obj_align(label1, LV_ALIGN_CENTER, 0, 0);
         // button logic
-        if (master.get_digital(DIGITAL_R1)) {
+        if (master.get_digital(DIGITAL_R2)) {
             if (intake_on == 0) {
                 intake.move_voltage(vel);
                 intake_on = 1;
             }
-        } else if (master.get_digital(DIGITAL_R2)) {
+        } else if (master.get_digital(DIGITAL_R1)) {
             if (intake_on == 0) {
                 intake.move_voltage(-vel);
                 intake_on = 1;
@@ -189,16 +209,16 @@ void opcontrol() {
             mogo_mech.retract();
             // piston_b.retract();
         }
-        // if (master.get_digital(DIGITAL_A)) {
-        //     hammer.extend();
-        // }
-        // if (master.get_digital(DIGITAL_B)) {
-        //     hammer.retract();
-        // }
+        if (master.get_digital(DIGITAL_A)) {
+            hammer.extend();
+        }
+        if (master.get_digital(DIGITAL_B)) {
+            hammer.retract();
+        }
         // drive logic
 		int dir = master.get_analog(ANALOG_LEFT_Y);    
 		int turn = master.get_analog(ANALOG_RIGHT_X);
-        chassis.arcade(dir, turn);
+        chassis.curvature(dir, turn);
 		pros::delay(20);                               // Run for 20 ms then update
 	}
 }
