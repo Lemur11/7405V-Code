@@ -3,6 +3,7 @@
 #include "autonSelector.h"
 #include "autons.h"
 #include "liblvgl/font/lv_font.h"
+#include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
 #include <cstdint>
@@ -156,14 +157,14 @@ void autonomous() {
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	// int curAuton = autonSelector.getState();
-    int curAuton = autonSelector.LEFT;
+    int curAuton = autonSelector.RIGHT;
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
         left_auton(chassis, intake, mogo_mech,  mogo_mech);
 	} else if (curAuton == autonSelector.RIGHT) {
-		//
+		right_auton(chassis, intake, mogo_mech,  mogo_mech);
 	} else if (curAuton == autonSelector.CARRY) {
-		//
+		carry_auton(chassis, intake, mogo_mech,  mogo_mech);
 	}
 }
 
@@ -209,10 +210,10 @@ void opcontrol() {
             mogo_mech.retract();
             // piston_b.retract();
         }
-        if (master.get_digital(DIGITAL_A)) {
+        if (master.get_digital(DIGITAL_Y)) {
             hammer.extend();
         }
-        if (master.get_digital(DIGITAL_B)) {
+        if (master.get_digital(DIGITAL_RIGHT)) {
             hammer.retract();
         }
         // drive logic
