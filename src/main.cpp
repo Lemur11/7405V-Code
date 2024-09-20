@@ -157,7 +157,7 @@ void autonomous() {
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	// int curAuton = autonSelector.getState();
-    int curAuton = autonSelector.RIGHT;
+    int curAuton = autonSelector.LEFT;
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
         left_auton(chassis, intake, mogo_mech,  mogo_mech);
