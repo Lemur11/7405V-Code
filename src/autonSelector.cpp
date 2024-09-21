@@ -22,9 +22,16 @@ void AutonSelector::btnInit(int pos_x, int pos_y, int size_w, int size_h, void (
     lv_obj_set_pos(btn, pos_x, pos_y);                            /*Set its position*/
     lv_obj_set_size(btn, size_w, size_h);                          /*Set its size*/
     lv_obj_add_event_cb(btn, *cb_func, LV_EVENT_ALL, a);           /*Assign a callback to the button*/
-
+    std::string text;
     lv_obj_t * label = lv_label_create(btn);          /*Add a label to the button*/
-    lv_label_set_text(label, "Button");                     /*Set the labels text*/
+    if (*a == 2) {
+        text = "BlueNEG/RedPOS";
+    }
+    else if (*a == 3) {
+        text = "BluePOS/RedNEG";
+    }
+    const char * c = text.c_str();
+    lv_label_set_text(label, c);                     /*Set the labels text*/
     lv_obj_center(label);
     // while (true) {
     //     pros::delay(20);
@@ -39,6 +46,6 @@ void AutonSelector::btn_event_cb(lv_event_t * e) {
         autonSelector.setState(*autonptr);
         lv_obj_t * label = lv_obj_get_child(btn, 0);
         lv_label_set_text_fmt(label, "Button: %d", *autonptr);
-        lv_obj_clean(lv_scr_act());
+        // lv_obj_clean(lv_scr_act());
     }
 }

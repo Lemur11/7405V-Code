@@ -1,13 +1,7 @@
 #include "main.h"
-#include "lemlib/api.hpp"
 #include "autonSelector.h"
 #include "autons.h"
-#include "liblvgl/font/lv_font.h"
-#include "pros/misc.h"
-#include "pros/motors.h"
-#include "pros/rtos.hpp"
-#include <cstdint>
-#include <string>
+
 
 
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -114,8 +108,8 @@ void print_to_screen() {
 void initialize() {
     imu.reset();
     pros::delay(2000);
+	autonSelector.initialize();
     pros::Task task(print_to_screen);
-	// autonSelector.initialize();
     chassis.setPose(0, 0 ,0);
     chassis.calibrate();
 }
@@ -156,8 +150,7 @@ void autonomous() {
     left_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     right_mg.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     intake.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-	// int curAuton = autonSelector.getState();
-    int curAuton = autonSelector.LEFT;
+	int curAuton = autonSelector.getState();
     printf("%d", curAuton);
 	if (curAuton == autonSelector.LEFT) {
         left_auton(chassis, intake, mogo_mech,  mogo_mech);
@@ -166,6 +159,7 @@ void autonomous() {
 	} else if (curAuton == autonSelector.CARRY) {
 		carry_auton(chassis, intake, mogo_mech,  mogo_mech);
 	}
+
 }
 
 /**
