@@ -23,6 +23,7 @@ lemlib::Drivetrain drivetrain(&left_mg,
 // piston a, b
 pros::adi::Pneumatics hammer('a', false);
 pros::adi::Pneumatics mogo_mech('b', false);  
+pros::adi::Pneumatics hang('d', false);
 // imu 8
 pros::Imu imu(3);
 // TODO determine where rotation sensor is reversed or not
@@ -209,6 +210,9 @@ void opcontrol() {
         }
         if (master.get_digital(DIGITAL_RIGHT)) {
             hammer.retract();
+        } 
+        if (master.get_digital(DIGITAL_LEFT)) {
+            hang.extend();
         }
         // drive logic
 		int dir = master.get_analog(ANALOG_LEFT_Y);    

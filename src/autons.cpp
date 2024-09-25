@@ -64,7 +64,7 @@ void left_auton(lemlib::Chassis& chassis, pros::v5::MotorGroup& intake, pros::ad
 }
 void carry_auton(lemlib::Chassis& chassis, pros::v5::MotorGroup& intake, pros::adi::Pneumatics& mogo, pros::adi::Pneumatics& hammer) {
     chassis.setPose(0, 0, 0);
-    
+    pros::delay(4000);   
     chassis.moveToPoint(0, -11, 4000, {.forwards = false, .maxSpeed = 30});
     // intake.move_velocity(100);
     while (chassis.isInMotion()) {
@@ -72,10 +72,11 @@ void carry_auton(lemlib::Chassis& chassis, pros::v5::MotorGroup& intake, pros::a
     }
     intake.move_velocity(200);
     pros::delay(1750);
-
-    intake.move_velocity(-500);
+    intake.move_velocity(0);
     chassis.moveToPose(-6.1, 30.6, 0, 4000);
-    pros::delay(2200);
+    pros::delay(1400);
+    intake.move_velocity(-500);
+    pros::delay(800);
     intake.move_velocity(0);
     chassis.turnToHeading(305, 800);
     printf("Done");
@@ -97,6 +98,7 @@ void carry_auton(lemlib::Chassis& chassis, pros::v5::MotorGroup& intake, pros::a
 
 void right_auton(lemlib::Chassis& chassis, pros::v5::MotorGroup& intake, pros::adi::Pneumatics& mogo, pros::adi::Pneumatics& hammer) {
     chassis.setPose(0, 0, 0);
+    pros::delay(4000);
     chassis.moveToPoint(0, -11, 4000, {.forwards = false, .maxSpeed = 30});
     // intake.move_velocity(100);
     while (chassis.isInMotion()) {
@@ -134,6 +136,6 @@ void right_auton(lemlib::Chassis& chassis, pros::v5::MotorGroup& intake, pros::a
     mogo.retract();
     pros::delay(500);
     intake.move_velocity(0);
-    chassis.moveToPoint(6, 39, 4000);
+    chassis.moveToPoint(4, 39, 4000);
 
 }

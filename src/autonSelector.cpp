@@ -1,6 +1,4 @@
 #include "autonSelector.h"
-#include <cstdio>
-#include <memory>
 
 
 void AutonSelector::setState(int a) {
